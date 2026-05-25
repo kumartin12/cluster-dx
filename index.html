@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CB Cluster DX — Real-time DX Spots for iOS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&family=DM+Mono&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sky:    #e8f4fd;
+  --sky2:   #d0e9f9;
+  --white:  #ffffff;
+  --ink:    #0d1f2d;
+  --ink2:   #3a5068;
+  --ink3:   #7a9ab5;
+  --accent: #0066cc;
+  --accent2:#004fa3;
+  --gold:   #c47f00;
+  --gold-bg:#fff8e6;
+  --red:    #d93025;
+  --border: #d4e6f4;
+  --shadow: 0 2px 24px rgba(13,31,45,0.08);
+  --shadow-lg: 0 8px 48px rgba(13,31,45,0.13);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+
+body {
+  background: var(--white);
+  color: var(--ink);
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 300;
+  overflow-x: hidden;
+}
+
+/* ── TOPBAR ── */
+.topbar {
+  background: var(--accent);
+  color: #fff;
+  text-align: center;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  padding: 0.55rem 1rem;
+  font-weight: 400;
+}
+.topbar a { color: rgba(255,255,255,0.85); text-decoration: underline; }
+
+/* ── TICKER ── */
+.ticker-bar {
+  background: var(--ink);
+  overflow: hidden;
+  padding: 0;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.ticker-track {
+  display: flex;
+  white-space: nowrap;
+  animation: ticker 50s linear infinite;
+  padding: 0.55rem 0;
+}
+.ticker-track:hover { animation-play-state: paused; }
+@keyframes ticker {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.ticker-spot {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-right: 3rem;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.45);
+}
+.ticker-spot .t-call { color: #f0c060; font-weight: 500; }
+.ticker-spot .t-freq { color: rgba(255,255,255,0.85); }
+.ticker-spot .t-band {
+  background: rgba(255,255,255,0.08);
+  border-radius: 3px;
+  padding: 0.05rem 0.35rem;
+  font-size: 0.6rem;
+  color: rgba(255,255,255,0.5);
+}
+.ticker-spot .t-sep { color: rgba(255,255,255,0.15); margin: 0 0.2rem; }
+
+
+/* ── NAV ── */
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 3rem;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.nav-brand {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+.nav-brand-name {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.25rem;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+.nav-brand-name em {
+  font-style: italic;
+  color: var(--accent);
+}
+.nav-tag {
+  font-size: 0.6rem;
+  color: var(--ink3);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-left: 0.3rem;
+}
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 2.5rem;
+}
+.nav-links a {
+  color: var(--ink2);
+  text-decoration: none;
+  font-size: 0.82rem;
+  font-weight: 400;
+  transition: color 0.15s;
+}
+.nav-links a:hover { color: var(--accent); }
+.nav-cta {
+  background: var(--accent);
+  color: #fff !important;
+  padding: 0.45rem 1.2rem;
+  border-radius: 6px;
+  font-weight: 500 !important;
+  font-size: 0.78rem !important;
+  transition: background 0.15s !important;
+}
+.nav-cta:hover { background: var(--accent2) !important; color: #fff !important; }
+
+/* ── HERO ── */
+.hero {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 90vh;
+  overflow: hidden;
+}
+.hero-left {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 6rem 5rem 6rem 8vw;
+  position: relative;
+}
+.hero-left::after {
+  content: '';
+  position: absolute;
+  right: 0; top: 15%; bottom: 15%;
+  width: 1px;
+  background: linear-gradient(to bottom, transparent, var(--border), transparent);
+}
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 1.5rem;
+}
+.hero-eyebrow::before {
+  content: '';
+  display: inline-block;
+  width: 24px; height: 2px;
+  background: var(--accent);
+}
+.hero-h1 {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(3rem, 5vw, 4.8rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin-bottom: 1.5rem;
+}
+.hero-h1 em {
+  font-style: italic;
+  color: var(--accent);
+}
+.hero-body {
+  font-size: 1.05rem;
+  color: var(--ink2);
+  line-height: 1.75;
+  max-width: 420px;
+  margin-bottom: 2.5rem;
+  font-weight: 300;
+}
+.hero-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--ink);
+  color: #fff;
+  padding: 0.85rem 1.8rem;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s;
+  box-shadow: 0 4px 14px rgba(13,31,45,0.22);
+}
+.btn-primary:hover {
+  background: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0,102,204,0.3);
+}
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--ink2);
+  font-size: 0.82rem;
+  font-weight: 400;
+  text-decoration: none;
+  padding: 0.85rem 1.4rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  transition: all 0.2s;
+}
+.btn-secondary:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.hero-note {
+  margin-top: 1.5rem;
+  font-size: 0.72rem;
+  color: var(--ink3);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.hero-note::before {
+  content: '★★★★★';
+  color: var(--gold);
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+}
+
+/* Hero right — decorative panel */
+.hero-right {
+  background: var(--sky);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 3rem;
+  position: relative;
+  overflow: hidden;
+}
+.hero-right::before {
+  content: '';
+  position: absolute;
+  width: 500px; height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,102,204,0.10) 0%, transparent 70%);
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+}
+
+/* Real screenshot in hero */
+.phone-real {
+  position: relative;
+  z-index: 2;
+  animation: float 6s ease-in-out infinite;
+  filter: drop-shadow(0 28px 52px rgba(13,31,45,0.25));
+}
+.phone-real img {
+  width: 240px;
+  border-radius: 36px;
+  display: block;
+}
+@keyframes float {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(-12px); }
+}
+
+
+/* ── VIDEO SECTION ── */
+.video-section {
+  padding: 7rem 8vw;
+  background: var(--white);
+  text-align: center;
+}
+.video-inner {
+  max-width: 900px;
+  margin: 0 auto;
+}
+.video-wrap {
+  margin-top: 3.5rem;
+  position: relative;
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 0 24px 80px rgba(13,31,45,0.18), 0 2px 8px rgba(13,31,45,0.08);
+  background: var(--ink);
+  aspect-ratio: 16/9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.video-wrap video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 28px;
+}
+.video-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  color: var(--ink3);
+}
+.video-placeholder-icon {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+}
+.video-placeholder p {
+  font-size: 0.8rem;
+  opacity: 0.5;
+  letter-spacing: 0.04em;
+}
+
+/* ── SCREENSHOTS GALLERY ── */
+.screenshots-section {
+  padding: 7rem 8vw;
+  background: var(--sky);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+}
+.screenshots-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.screenshots-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  margin-top: 3.5rem;
+}
+.screenshot-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.2rem;
+}
+.screenshot-item img {
+  width: 100%;
+  max-width: 260px;
+  border-radius: 28px;
+  box-shadow: 0 16px 48px rgba(13,31,45,0.16), 0 2px 8px rgba(13,31,45,0.08);
+  transition: transform 0.3s, box-shadow 0.3s;
+  display: block;
+}
+.screenshot-item:hover img {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 28px 60px rgba(13,31,45,0.22);
+}
+.screenshot-label {
+  font-size: 0.78rem;
+  color: var(--ink2);
+  font-weight: 400;
+  text-align: center;
+  letter-spacing: 0.01em;
+}
+.screenshot-label strong {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--ink);
+  font-weight: 500;
+  margin-bottom: 0.2rem;
+}
+
+/* Floating info cards */
+.hero-card {
+  position: absolute;
+  background: var(--white);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 0.7rem 1rem;
+  font-size: 0.7rem;
+  z-index: 3;
+  border: 1px solid var(--border);
+}
+.hero-card.left { left: 4%; top: 28%; }
+.hero-card.right { right: 2%; bottom: 28%; }
+.hc-label { color: var(--ink3); font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.2rem; }
+.hc-val { color: var(--ink); font-weight: 500; font-size: 0.82rem; }
+.hc-sub { color: var(--ink3); font-size: 0.6rem; margin-top: 0.15rem; }
+.hc-live { display: flex; align-items: center; gap: 0.4rem; }
+.hc-live-dot { width: 6px; height: 6px; background: #2ecc71; border-radius: 50%; box-shadow: 0 0 0 3px rgba(46,204,113,0.2); }
+
+/* ── STATS STRIP ── */
+.stats-strip {
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: var(--sky);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+.stat-item {
+  padding: 2rem 2.5rem;
+  border-right: 1px solid var(--border);
+  transition: background 0.2s;
+}
+.stat-item:last-child { border-right: none; }
+.stat-item:hover { background: var(--sky2); }
+.stat-num {
+  font-family: 'DM Serif Display', serif;
+  font-size: 2.4rem;
+  color: var(--ink);
+  line-height: 1;
+  margin-bottom: 0.3rem;
+}
+.stat-num em { font-style:italic; color: var(--accent); }
+.stat-label { font-size: 0.75rem; color: var(--ink3); font-weight: 400; }
+
+/* ── FEATURES ── */
+.features {
+  padding: 7rem 8vw;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.section-eyebrow {
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.8rem;
+}
+.section-h2 {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(2rem, 3.5vw, 3rem);
+  color: var(--ink);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  margin-bottom: 1rem;
+  max-width: 600px;
+}
+.section-h2 em { font-style: italic; color: var(--accent); }
+.section-sub {
+  font-size: 0.95rem;
+  color: var(--ink2);
+  line-height: 1.7;
+  max-width: 540px;
+  margin-bottom: 4rem;
+  font-weight: 300;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+.feat-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 2rem;
+  transition: all 0.22s;
+  position: relative;
+  overflow: hidden;
+}
+.feat-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s;
+}
+.feat-card:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow);
+  transform: translateY(-3px);
+}
+.feat-card:hover::after { transform: scaleX(1); }
+
+.feat-icon {
+  width: 44px; height: 44px;
+  background: var(--sky);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  margin-bottom: 1.2rem;
+  transition: background 0.2s;
+}
+.feat-card:hover .feat-icon { background: var(--sky2); }
+.feat-h3 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.15rem;
+  color: var(--ink);
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.01em;
+}
+.feat-p {
+  font-size: 0.82rem;
+  color: var(--ink2);
+  line-height: 1.7;
+  font-weight: 300;
+}
+
+/* ── SPOTS SECTION ── */
+.spots-section {
+  background: var(--sky);
+  padding: 7rem 8vw;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.spots-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 5rem;
+  align-items: center;
+}
+.spots-copy .section-sub { margin-bottom: 2rem; }
+
+.filter-pills {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+.pill {
+  padding: 0.3rem 0.8rem;
+  border-radius: 99px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  border: 1px solid var(--border);
+  color: var(--ink2);
+  background: var(--white);
+}
+.pill.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.pill:hover:not(.active) { border-color: var(--accent); color: var(--accent); }
+
+.spots-panel {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+}
+.spots-panel-header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.sph-title { font-size: 0.8rem; font-weight: 500; color: var(--ink); }
+.sph-live {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.65rem;
+  color: var(--ink3);
+}
+.live-dot {
+  width: 7px; height: 7px;
+  background: #2ecc71;
+  border-radius: 50%;
+  animation: pulse 2s ease infinite;
+}
+@keyframes pulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(46,204,113,0.5); }
+  50%      { box-shadow: 0 0 0 5px rgba(46,204,113,0); }
+}
+.spots-table { width: 100%; border-collapse: collapse; }
+.spots-table thead th {
+  text-align: left;
+  padding: 0.6rem 1.5rem;
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  background: #fafcff;
+  border-bottom: 1px solid var(--border);
+}
+.spots-table tbody td {
+  padding: 0.75rem 1.5rem;
+  font-size: 0.78rem;
+  border-bottom: 1px solid #f0f6fb;
+  font-family: 'DM Mono', monospace;
+  vertical-align: middle;
+}
+.spots-table tbody tr:last-child td { border-bottom: none; }
+.spots-table tbody tr {
+  transition: background 0.12s;
+  animation: rowIn 0.4s ease both;
+}
+.spots-table tbody tr:hover { background: #f5faff; }
+@keyframes rowIn {
+  from { opacity: 0; transform: translateX(-6px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.spots-table tbody tr:nth-child(1) { animation-delay: 0.05s; }
+.spots-table tbody tr:nth-child(2) { animation-delay: 0.1s; }
+.spots-table tbody tr:nth-child(3) { animation-delay: 0.15s; }
+.spots-table tbody tr:nth-child(4) { animation-delay: 0.2s; }
+.spots-table tbody tr:nth-child(5) { animation-delay: 0.25s; }
+
+td.td-call { color: var(--ink); font-weight: 500; }
+td.td-freq { color: var(--accent); }
+td.td-info { color: var(--ink2); font-family: 'DM Sans', sans-serif; font-size: 0.75rem; }
+td.td-time { color: var(--ink3); font-size: 0.7rem; }
+.band-badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.62rem;
+  font-weight: 500;
+  background: var(--sky);
+  color: var(--accent);
+  border: 1px solid var(--sky2);
+}
+
+/* ── CTA SECTION ── */
+.cta-section {
+  padding: 7rem 2rem;
+  text-align: center;
+  background: var(--white);
+}
+.cta-section .section-h2 {
+  margin: 0.8rem auto 1rem;
+  max-width: 640px;
+  font-size: clamp(2.2rem, 4vw, 3.5rem);
+}
+.cta-section .section-sub {
+  margin: 0 auto 2.5rem;
+  max-width: 480px;
+}
+.cta-row {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.appstore-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  background: var(--ink);
+  color: #fff;
+  padding: 1rem 2.2rem;
+  border-radius: 14px;
+  text-decoration: none;
+  transition: all 0.2s;
+  box-shadow: var(--shadow-lg);
+}
+.appstore-btn:hover {
+  background: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(0,102,204,0.25);
+}
+.asb-icon { font-size: 1.6rem; line-height: 1; }
+.asb-text { text-align: left; }
+.asb-sub { font-size: 0.62rem; opacity: 0.7; display: block; }
+.asb-main { font-size: 0.95rem; font-weight: 500; display: block; }
+
+.cta-note {
+  margin-top: 1.5rem;
+  font-size: 0.75rem;
+  color: var(--ink3);
+}
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 2.5rem 8vw;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.footer-brand {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.1rem;
+  color: var(--ink);
+}
+.footer-brand em { font-style:italic; color: var(--accent); }
+.footer-copy { font-size: 0.7rem; color: var(--ink3); margin-top: 0.2rem; }
+.footer-links { display: flex; gap: 1.5rem; }
+.footer-links a {
+  font-size: 0.75rem;
+  color: var(--ink3);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.footer-links a:hover { color: var(--accent); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .hero { grid-template-columns: 1fr; }
+  .hero-left { padding: 4rem 6vw 3rem; }
+  .hero-left::after { display: none; }
+  .hero-right { min-height: 420px; }
+  .hero-card.left, .hero-card.right { display: none; }
+  .stats-strip { grid-template-columns: repeat(2,1fr); }
+  .features-grid { grid-template-columns: 1fr 1fr; }
+  .spots-inner { grid-template-columns: 1fr; gap: 2.5rem; }
+  nav { padding: 0 1.5rem; }
+  .nav-links { display: none; }
+  .features { padding: 4rem 6vw; }
+  .spots-section { padding: 4rem 6vw; }
+}
+@media (max-width: 560px) {
+  .features-grid { grid-template-columns: 1fr; }
+  .stats-strip { grid-template-columns: 1fr 1fr; }
+  .stat-item { padding: 1.5rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  Now available on the App Store — free download &nbsp;·&nbsp;
+  <a href="https://apps.apple.com/cz/app/dx-cluster-monitor/id6754661294?l=cs" target="_blank">Get it →</a>
+</div>
+
+
+<div class="ticker-bar">
+  <div class="ticker-track" id="tickerTrack">
+    <span class="ticker-spot"><span class="t-band">--</span><span class="t-call">Načítám spoty…</span></span>
+  </div>
+</div>
+
+<!-- Nav -->
+<nav>
+  <div class="nav-brand">
+    <span class="nav-brand-name">CB Cluster <em>DX</em></span>
+    <span class="nav-tag">for iOS</span>
+  </div>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#spots">Live Spots</a>
+    <a href="https://pckucera.cz" target="_blank">pckucera.cz</a>
+    <a href="https://apps.apple.com/cz/app/dx-cluster-monitor/id6754661294?l=cs" target="_blank" class="nav-cta">Download Free</a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-left">
+    <div class="hero-eyebrow">DX Cluster · HF Amateur Radio</div>
+    <h1 class="hero-h1">
+      Real-time DX spots,<br>
+      <em>always in your pocket.</em>
+    </h1>
+    <p class="hero-body">
+      CB Cluster DX brings the worldwide DX cluster network to your iPhone and iPad.
+      Live spots, band filters, watchlist alerts — built for the serious DX hunter.
+    </p>
+    <div class="hero-actions">
+      <a href="https://apps.apple.com/cz/app/dx-cluster-monitor/id6754661294?l=cs" class="btn-primary" target="_blank">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+        Download on App Store
+      </a>
+      <a href="#features" class="btn-secondary">Learn more →</a>
+    </div>
+    <div class="hero-note">Rated 5 stars · Free · iPhone &amp; iPad</div>
+  </div>
+
+  <div class="hero-right">
+    <!-- Floating card left -->
+    <div class="hero-card left">
+      <div class="hc-label">Network</div>
+      <div class="hc-val hc-live"><span class="hc-live-dot"></span>CRX Network</div>
+      <div class="hc-sub">12 nodes online</div>
+    </div>
+
+    <!-- Real screenshot -->
+    <div class="phone-real">
+      <img src="screen1.png" alt="DX Cluster Monitor – Spots screen">
+    </div>
+
+    <!-- Floating card right -->
+    <div class="hero-card right">
+      <div class="hc-label">Coverage</div>
+      <div class="hc-val">352 divisions</div>
+      <div class="hc-sub">160m – 10m + WARC</div>
+    </div>
+  </div>
+</section>
+
+<!-- Stats strip -->
+<div class="stats-strip">
+  <div class="stat-item">
+    <div class="stat-num">352</div>
+    <div class="stat-label">CB Divisions covered</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num"><em>Live</em></div>
+    <div class="stat-label">Real-time CRX Network spots</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">9</div>
+    <div class="stat-label">HF bands + WARC</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">Free</div>
+    <div class="stat-label">Download on App Store</div>
+  </div>
+</div>
+
+<!-- Features -->
+<section class="features" id="features">
+  <p class="section-eyebrow">Features</p>
+  <h2 class="section-h2">Everything a DX hunter <em>needs.</em></h2>
+  <p class="section-sub">Built from the ground up for amateur radio operators. No bloat, just the data you need — fast, clean, and native iOS.</p>
+
+  <div class="features-grid">
+    <div class="feat-card">
+      <div class="feat-icon">📡</div>
+      <h3 class="feat-h3">CRX Network</h3>
+      <p class="feat-p">Live DX spots via the CRX cluster API with automatic Telnet fallback. Stay connected even when the primary feed is down.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🔔</div>
+      <h3 class="feat-h3">Watchlist Alerts</h3>
+      <p class="feat-p">Add callsigns or DXCC prefixes to your watchlist. Get a push notification the moment your target appears in the spot stream.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🗂</div>
+      <h3 class="feat-h3">Band & Mode Filters</h3>
+      <p class="feat-p">Filter by band, mode, continent or DXCC entity. Quickly slice through hundreds of spots to find exactly what matters.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🌍</div>
+      <h3 class="feat-h3">DXCC Lookup</h3>
+      <p class="feat-p">Instant DXCC entity lookup for every spotted callsign. Flag, prefix, CQ zone and ITU zone shown at a glance.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">📻</div>
+      <h3 class="feat-h3">All HF Bands</h3>
+      <p class="feat-p">160 metres through 10 metres, plus all three WARC bands. CW, SSB, FT8, RTTY — every mode in one unified stream.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">✦</div>
+      <h3 class="feat-h3">Native iOS Design</h3>
+      <p class="feat-p">Built with SwiftUI for iPhone and iPad. Dark mode, Dynamic Type, background refresh and clean Apple design guidelines throughout.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Spots section -->
+<section class="spots-section" id="spots">
+  <div class="spots-inner">
+    <div class="spots-copy">
+      <p class="section-eyebrow">Live data</p>
+      <h2 class="section-h2">The cluster, <em>beautifully displayed.</em></h2>
+      <p class="section-sub">Every spot shows you what you need: who spotted it, on which frequency, with what comment — and how long ago. Filter by band in one tap.</p>
+
+      <div class="filter-pills">
+        <span class="pill active">All bands</span>
+        <span class="pill">20m</span>
+        <span class="pill">15m</span>
+        <span class="pill">40m</span>
+        <span class="pill">10m</span>
+        <span class="pill">CW</span>
+        <span class="pill">FT8</span>
+      </div>
+
+      <a href="https://apps.apple.com/cz/app/dx-cluster-monitor/id6754661294?l=cs" class="btn-primary" target="_blank" style="display:inline-flex;">
+        Try it free →
+      </a>
+    </div>
+
+    <div class="spots-panel">
+      <div class="spots-panel-header">
+        <span class="sph-title">DX Spots — All Bands</span>
+        <span class="sph-live"><span class="live-dot"></span>Live · CRX Network</span>
+      </div>
+      <table class="spots-table">
+        <thead>
+          <tr>
+            <th>Spotter</th>
+            <th>Freq (kHz)</th>
+            <th>DX / Comment</th>
+            <th>Band</th>
+            <th>Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="td-call">OK1DX</td>
+            <td class="td-freq">14195.0</td>
+            <td class="td-info">VK2GR — CW 599 loud</td>
+            <td><span class="band-badge">20m</span></td>
+            <td class="td-time">14:23z</td>
+          </tr>
+          <tr>
+            <td class="td-call">OM3LA</td>
+            <td class="td-freq">21025.0</td>
+            <td class="td-info">3B8CW — CW UP5</td>
+            <td><span class="band-badge">15m</span></td>
+            <td class="td-time">14:21z</td>
+          </tr>
+          <tr>
+            <td class="td-call">PA3EWP</td>
+            <td class="td-freq">7074.0</td>
+            <td class="td-info">ZL2BX — FT8 -12dB</td>
+            <td><span class="band-badge">40m</span></td>
+            <td class="td-time">14:19z</td>
+          </tr>
+          <tr>
+            <td class="td-call">OZ5TX</td>
+            <td class="td-freq">28074.0</td>
+            <td class="td-info">VU2BGS — FT8 LOUD</td>
+            <td><span class="band-badge">10m</span></td>
+            <td class="td-time">14:18z</td>
+          </tr>
+          <tr>
+            <td class="td-call">DK9GW</td>
+            <td class="td-freq">10140.0</td>
+            <td class="td-info">T88SM — FT8 -08dB</td>
+            <td><span class="band-badge">30m</span></td>
+            <td class="td-time">14:15z</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- Video -->
+<section class="video-section" id="demo">
+  <div class="video-inner">
+    <p class="section-eyebrow">Demo</p>
+    <h2 class="section-h2">Watch it <em>live.</em></h2>
+    <p class="section-sub">See DX Cluster Monitor in action — real-time spots, alerts and band statistics on your iPhone.</p>
+
+    <div class="video-wrap">
+      <video autoplay loop muted playsinline poster="screen1.png" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+        <source src="demo.mp4" type="video/mp4">
+      </video>
+      <div class="video-placeholder" style="display:none;">
+        <div class="video-placeholder-icon">▶</div>
+        <p>demo.mp4 — nahraj soubor do složky</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Screenshots Gallery -->
+<section class="screenshots-section" id="screenshots">
+  <div class="screenshots-inner">
+    <p class="section-eyebrow">Screenshots</p>
+    <h2 class="section-h2">See it <em>in action.</em></h2>
+    <p class="section-sub">Real screenshots from the app — clean, native iOS design built for amateur radio operators.</p>
+
+    <div class="screenshots-grid">
+      <div class="screenshot-item">
+        <img src="screen1.png" alt="DX Cluster – Live Spots">
+        <div class="screenshot-label">
+          <strong>Live DX Spots</strong>
+          Real-time feed with band badges, flags and frequencies
+        </div>
+      </div>
+      <div class="screenshot-item">
+        <img src="screen2.png" alt="DX Cluster – Alerts">
+        <div class="screenshot-label">
+          <strong>Smart Alerts</strong>
+          Watch specific callsigns and regions, filter by band
+        </div>
+      </div>
+      <div class="screenshot-item">
+        <img src="screen3.png" alt="DX Cluster – Statistics">
+        <div class="screenshot-label">
+          <strong>Band Statistics</strong>
+          See which bands are active at a glance
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <p class="section-eyebrow">Get started</p>
+  <h2 class="section-h2">Download free.<br><em>Start hunting DX today.</em></h2>
+  <p class="section-sub">Available on iPhone and iPad. Free download on the App Store — no subscription required.</p>
+  <div class="cta-row">
+    <a href="https://apps.apple.com/cz/app/dx-cluster-monitor/id6754661294?l=cs" class="appstore-btn" target="_blank">
+      <span class="asb-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+      </span>
+      <span class="asb-text">
+        <span class="asb-sub">Download on the</span>
+        <span class="asb-main">App Store</span>
+      </span>
+    </a>
+  </div>
+  <p class="cta-note">Free · iPhone &amp; iPad · iOS 16+ · Built by pckucera.cz &nbsp;·&nbsp; 73 de OK2/JN69</p>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div>
+    <div class="footer-brand">CB Cluster <em>DX</em></div>
+    <div class="footer-copy">© 2026 pckucera.cz — Amateur Radio iOS Apps</div>
+  </div>
+  <div class="footer-links">
+    <a href="#">Privacy Policy</a>
+    <a href="#">Support</a>
+    <a href="https://pckucera.cz" target="_blank">pckucera.cz</a>
+    <a href="https://apps.apple.com/cz/app/dx-cluster-monitor/id6754661294?l=cs" target="_blank">App Store</a>
+  </div>
+</footer>
+
+
+<script>
+// ── LIVE DX TICKER via HamQTH public API ──
+const BANDS = {
+  '160M':'160m','80M':'80m','60M':'60m','40M':'40m','30M':'30m',
+  '20M':'20m','17M':'17m','15M':'15m','12M':'12m','10M':'10m',
+  '6M':'6m','4M':'4m','2M':'2m'
+};
+
+function bandColor(band) {
+  const colors = {
+    '160m':'#8b5cf6','80m':'#ef4444','60m':'#f97316','40m':'#f59e0b',
+    '30m':'#84cc16','20m':'#0ea5e9','17m':'#06b6d4','15m':'#22d3ee',
+    '12m':'#a78bfa','10m':'#34d399','6m':'#fb7185','2m':'#c084fc'
+  };
+  return colors[band] || '#94a3b8';
+}
+
+function parseHamQTH(csv) {
+  return csv.trim().split('\n').map(line => {
+    const p = line.split('^');
+    if (p.length < 9) return null;
+    return {
+      spotter: p[0].trim(),
+      freq:    parseFloat(p[1]).toFixed(1),
+      dx:      p[2].trim(),
+      comment: p[3].trim(),
+      band:    BANDS[p[8].trim().toUpperCase()] || p[8].trim().toLowerCase(),
+    };
+  }).filter(Boolean);
+}
+
+function renderTicker(spots) {
+  const track = document.getElementById('tickerTrack');
+  if (!spots.length) return;
+  // Double for seamless loop
+  const all = [...spots, ...spots];
+  track.innerHTML = all.map(s => `
+    <span class="ticker-spot">
+      <span class="t-band" style="background:${bandColor(s.band)}22;color:${bandColor(s.band)};border:1px solid ${bandColor(s.band)}44">${s.band}</span>
+      <span class="t-call">${s.spotter}</span>
+      <span class="t-sep">›</span>
+      <span class="t-freq">${s.freq}</span>
+      <span class="t-sep">·</span>
+      <strong style="color:rgba(255,255,255,0.85)">${s.dx}</strong>
+      ${s.comment ? `<span style="color:rgba(255,255,255,0.35)">${s.comment.substring(0,25)}</span>` : ''}
+    </span>
+  `).join('');
+}
+
+async function fetchSpots() {
+  try {
+    const res = await fetch('https://www.hamqth.com/dxc_csv.php?limit=20');
+    const text = await res.text();
+    const spots = parseHamQTH(text);
+    if (spots.length) renderTicker(spots);
+  } catch(e) {
+    console.log('Ticker fetch failed:', e);
+  }
+}
+
+// Load immediately, then refresh every 30s
+fetchSpots();
+setInterval(fetchSpots, 30000);
+
+// Filter pills interaction
+document.querySelectorAll('.pill').forEach(pill => {
+  pill.addEventListener('click', function() {
+    document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+</script>
+
+</body>
+</html>
